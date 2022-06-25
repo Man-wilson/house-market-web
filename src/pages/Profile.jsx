@@ -6,6 +6,9 @@ import { db } from '../firebase.config';
 import { updateDoc, doc, firebase } from 'firebase/firestore';
 import { async } from '@firebase/util';
 import { toast } from 'react-toastify';
+import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg'
+import homeIcon from '../assets/svg/homeIcon.svg'
+
 
 function Profile() {
 	const auth = getAuth();
@@ -92,6 +95,12 @@ function Profile() {
 						/>
 					</form>
 				</div>
+
+				<Link t0='/create-listings' className='createListing'>
+					<img src={homeIcon} alt="home" />
+					<p>Sell or rent your home</p>
+					<img src={arrowRight} alt="arrowRight" />
+				</Link>
 			</main>
 		</div>
 	);
