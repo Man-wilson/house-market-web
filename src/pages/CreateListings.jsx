@@ -81,7 +81,7 @@ import { async } from '@firebase/util';
 		
 		// handle image upload
 		if (e.target.files) {
-			const image = handleImageUpload(e.target.files[0]);
+			const image = await handleImageUpload(e.target.files[0]);
 
 			return setFormData(prevState => {
 				return {...prevState, images : [image]}
@@ -90,16 +90,11 @@ import { async } from '@firebase/util';
 
 		return setFormData(prevState => {
 			return {...prevState, [e.target.id] : boolean ?? e.target.value}
-		})
-
-		setFormData(prevState => ({
-			...prevState,
-			[e.target.id]: boolean ?? e.target.value,
-		}));
+		});
 	};
 
 	// handle upload image here
-	const handleImageUpload = file => {}
+	const handleImageUpload = async file => {}
 
 	if (loading) {
 		return <Spinner />;
@@ -329,7 +324,6 @@ import { async } from '@firebase/util';
 						type='file'
 						id='images'
 						onChange={onMutate}
-						max='6'
 						accept='.jpg,.png,.jpeg'
 						required
 					/>
