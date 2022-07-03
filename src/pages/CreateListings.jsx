@@ -59,80 +59,7 @@ import { async } from '@firebase/util';
 			} else {
 				navigate('/sign-in');
 			}
-
-      // store image in firebase
-      const storeImage = async (image) => {
-        return new Promise ((resolve, reject) => {
-          const storage = getStorage()
-          const fileName = `${auth.currentUser.uid}-${image.name}-$
-          {uuidv4 ()}`
-
-          const storageRef = ref(storage, 'images/' + fileName)
-
-          const uploadTask = uploadBytesResumable(storageRef, image)
-
-          uploadTask.on('state_changed', 
-  (snapshot) => {
-    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    console.log('Upload is ' + progress + '% done');
-    switch (snapshot.state) {
-      case 'paused':
-        console.log('Upload is paused');
-        break;
-      case 'running':
-        console.log('Upload is running');
-        break;
-    }
-  }, 
-  (error) => {
-    reject(error)
-  },
-  () => {
-    // Handle successful uploads on complete
-    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-      resolve(downloadURL);
-    });
-  }
-);
-
-        })
-        
-      }
-
-      
-        // const imgUrls = async (
-        //   [...images].map((image) => await storeImage(image))
-        // ).catch(() => {
-        //   setLoading(false)
-        //   toast.error('Images not uploaded')
-        //   return
-        // })
-  
-        const formDataCopy = {
-          ...formData,
-        //   imgUrls,
-          geolocation,
-          timestamp: serverTimestamp()
-        }
-
-        formDataCopy.location = address
-        delete formDataCopy.images
-        delete formDataCopy.address
-        !formDataCopy.offer && delete formDataCopy.discountedPrice
-
-        const docRef = await addDoc (collection(db, 'listings'), formDataCopy)
-        setLoading (false)
-        toast.success('Listing Saved')
-        navigate (`/category/${formDataCopy.type}/${docRef.id}`) 
-
-    
-      
-     
-
-
-      
-		});
+		})
 	}, []);
 
 	const onSubmit = e => {
@@ -142,7 +69,7 @@ import { async } from '@firebase/util';
 	};
 
 	// to allow texts and boolean to work
-	const onMutate = e => {
+	const onMutate = async e => {
 		let boolean = null;
 
 		if (e.target.value === 'true') {
@@ -151,22 +78,28 @@ import { async } from '@firebase/util';
 		if (e.target.value === 'false') {
 			boolean = false;
 		}
-		// files
+		
+		// handle image upload
 		if (e.target.files) {
-			setFormData(prevState => ({
-				...prevState,
-				images: e.target.files,
-			}));
+			const image = handleImageUpload(e.target.files[0]);
+
+			return setFormData(prevState => {
+				return {...prevState, images : [image]}
+			})
 		}
 
-		// Text/Booleans/Numbers
-		if (!e.target.files) {
-			setFormData(prevState => ({
-				...prevState,
-				[e.target.id]: boolean ?? e.target.value,
-			}));
-		}
+		return setFormData(prevState => {
+			return {...prevState, [e.target.id] : boolean ?? e.target.value}
+		})
+
+		setFormData(prevState => ({
+			...prevState,
+			[e.target.id]: boolean ?? e.target.value,
+		}));
 	};
+
+	// handle upload image here
+	const handleImageUpload = file => {}
 
 	if (loading) {
 		return <Spinner />;
@@ -388,7 +321,9 @@ import { async } from '@firebase/util';
 					)}
 
 					<label className='formLabel'>Images</label>
+					
 					<p>The first image will be the cover (max 6).</p>
+					
 					<input
 						className='formInputFile'
 						type='file'
@@ -396,7 +331,6 @@ import { async } from '@firebase/util';
 						onChange={onMutate}
 						max='6'
 						accept='.jpg,.png,.jpeg'
-						multiple
 						required
 					/>
 
