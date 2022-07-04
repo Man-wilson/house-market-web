@@ -4,6 +4,8 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {  uploadBytes } from "firebase/storage";
+
 import {addDoc, collection, serverTimestamp} from 'firebase/firestore'
 import {db} from '../firebase.config'
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +96,16 @@ import { async } from '@firebase/util';
 	};
 
 	// handle upload image here
-	const handleImageUpload = async file => {}
+	const handleImageUpload = async file => {
+
+const storage = getStorage();
+const storageRef = ref(storage, 'some-child');
+
+// 'file' comes from the Blob or File API
+uploadBytes(storageRef, file).then((snapshot) => {
+  console.log('Uploaded a blob or file!');
+});
+	}
 
 	if (loading) {
 		return <Spinner />;

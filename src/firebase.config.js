@@ -1,4 +1,4 @@
-// import firebase from 'firebase/compat/app'
+import firebase from 'firebase/app'
 import { initializeApp } from 'firebase/app';
 // import {getAuth} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore/lite';
@@ -15,6 +15,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseapp = initializeApp(firebaseConfig);
+
+// initialize cloud storage and get a reference to the service
 // const db = getFirestore(firebaseapp);
 // export const auth = getAuth (firebaseConfig)
 export const db = getFirestore(firebaseapp);
