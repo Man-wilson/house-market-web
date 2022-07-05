@@ -1,21 +1,17 @@
-
-
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import {  uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-import {addDoc, collection, serverTimestamp} from 'firebase/firestore'
-import {db} from '../firebase.config'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { storage } from '../firebase.config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 import Spinner from '../components/Spinner';
 import { async } from '@firebase/util';
 
-
- function CreateListings() {
+function CreateListings() {
 	const [geolocationEnabled, setGeolocationEnabled] = useState(true);
 	const [loading, setLoading] = useState(true);
 	const [formData, setFormData] = useState({
@@ -61,13 +57,12 @@ import { async } from '@firebase/util';
 			} else {
 				navigate('/sign-in');
 			}
-		})
+		});
 	}, []);
 
-	const onSubmit = e => {
+	const onSubmit = async e => {
 		e.preventDefault();
-		console.log('formData', formData);
-		// save to db
+		// handle save to db
 	};
 
 	// to allow texts and boolean to work
@@ -80,36 +75,39 @@ import { async } from '@firebase/util';
 		if (e.target.value === 'false') {
 			boolean = false;
 		}
-		
+
 		// handle image upload
 		if (e.target.files) {
-			const image = await handleImageUpload(e.target.files[0]);
+			try {
+				const imageUrl = await handleImageUpload(e.target.files[0]);
 
-			return setFormData(prevState => {
-				return {...prevState, images : [image]}
-			})
+				return setFormData(prevState => {
+					return { ...prevState, images: [imageUrl] };
+				});
+			} catch (error) {
+				console.error('error founed here', error);
+				return;
+			}
 		}
 
 		return setFormData(prevState => {
-			return {...prevState, [e.target.id] : boolean ?? e.target.value}
+			return { ...prevState, [e.target.id]: boolean ?? e.target.value };
 		});
 	};
 
 	// handle upload image here
 	const handleImageUpload = async file => {
+		const storageRef = ref(storage, `/images/${file.name}`);
+		const uploadTask = await uploadBytes(storageRef, file);
 
-const storage = getStorage();
-const storageRef = ref(storage, 'some-child');
-
-// 'file' comes from the Blob or File API
-uploadBytes(storageRef, file).then((snapshot) => {
-  console.log('Uploaded a blob or file!');
-});
-	}
+		return await getDownloadURL(uploadTask.ref);
+	};
 
 	if (loading) {
 		return <Spinner />;
 	}
+
+	console.log('images after upload', images);
 
 	return (
 		<div className='profile'>
@@ -327,9 +325,9 @@ uploadBytes(storageRef, file).then((snapshot) => {
 					)}
 
 					<label className='formLabel'>Images</label>
-					
+
 					<p>The first image will be the cover (max 6).</p>
-					
+
 					<input
 						className='formInputFile'
 						type='file'
