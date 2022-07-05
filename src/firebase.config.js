@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import firebase from 'firebase/compat/app'
 import { initializeApp } from 'firebase/compact/app';
+=======
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
+>>>>>>> 8b1805e2b342fb189a76be68781a7a18772203ef
 // import {getAuth} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore/lite';
 import { getStorage} from 'firebase/storage'
@@ -20,4 +25,9 @@ const firebaseapp = initializeApp(firebaseConfig);
 // initialize cloud storage and get a reference to the service
 // const db = getFirestore(firebaseapp);
 // export const auth = getAuth (firebaseConfig)
-export const db = getFirestore(firebaseapp);
+const db = getFirestore(firebaseapp);
+
+// initialize storage
+const storage = getStorage(firebaseapp);
+
+export { db, storage };
