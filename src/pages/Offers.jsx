@@ -28,12 +28,7 @@ function Offers() {
 				const listingsRef = collection(db, 'listings');
 
 				// Create Aquery
-				const q = query(
-					listingsRef,
-					where('offer', '==', true),
-					orderBy('timestamp', 'desc'),
-					limit(10)
-				);
+				const q = query(listingsRef, where('offer', '==', true), limit(10));
 
 				// Execute query
 				const querySnap = await getDocs(q);

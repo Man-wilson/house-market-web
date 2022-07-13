@@ -1,23 +1,21 @@
-
-
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-import {addDoc, collection, serverTimestamp} from 'firebase/firestore'
-import {db} from '../firebase.config'
+import { addDoc, collection } from 'firebase/firestore';
+import { db, storage } from '../firebase.config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
 import Spinner from '../components/Spinner';
 import { async } from '@firebase/util';
 
+function CreateListings() {
+	const geolocationEnabled = true;
 
- function CreateListings() {
-	const [geolocationEnabled, setGeolocationEnabled] = useState(true);
 	const [loading, setLoading] = useState(true);
+
 	const [formData, setFormData] = useState({
 		type: 'rent',
 		name: '',
@@ -29,7 +27,7 @@ import { async } from '@firebase/util';
 		offer: '',
 		regularPrice: 0,
 		discountedPrice: 0,
-		images: {},
+		imgUrls: [],
 		latitude: 0,
 		longitude: 0,
 	});
@@ -45,7 +43,7 @@ import { async } from '@firebase/util';
 		offer,
 		regularPrice,
 		discountedprice,
-		images,
+		imgUrls,
 		latitude,
 		longitude,
 	} = formData;
@@ -61,13 +59,24 @@ import { async } from '@firebase/util';
 			} else {
 				navigate('/sign-in');
 			}
-		})
+		});
 	}, []);
 
-	const onSubmit = e => {
+	const onSubmit = async e => {
 		e.preventDefault();
-		console.log('formData', formData);
-		// save to db
+		// listings;
+
+		setLoading(true);
+
+		try {
+			const docRef = await addDoc(collection(db, 'listings'), formData);
+			console.log('docRef', docRef);
+			console.log('dd', docRef);
+		} catch (e) {
+			console.log('yoooo it happened', e);
+		}
+
+		setLoading(false);
 	};
 
 	// to allow texts and boolean to work
@@ -80,36 +89,45 @@ import { async } from '@firebase/util';
 		if (e.target.value === 'false') {
 			boolean = false;
 		}
-		
+
 		// handle image upload
 		if (e.target.files) {
-			const image = await handleImageUpload(e.target.files[0]);
+			try {
+				const uploadedImages = await handleImageUpload(e.target.files);
 
-			return setFormData(prevState => {
-				return {...prevState, images : [image]}
-			})
+				return setFormData(prevState => {
+					return { ...prevState, imgUrls: uploadedImages };
+				});
+			} catch (error) {
+				console.error('error founed here', error);
+				return;
+			}
 		}
 
 		return setFormData(prevState => {
-			return {...prevState, [e.target.id] : boolean ?? e.target.value}
+			return { ...prevState, [e.target.id]: boolean ?? e.target.value };
 		});
 	};
 
 	// handle upload image here
-	const handleImageUpload = async file => {
+	const handleImageUpload = async files => {
+		let data = [];
 
-const storage = getStorage();
-const storageRef = ref(storage, 'some-child');
+		for (let i = 0; i < files.length; i++) {
+			const storageRef = ref(storage, `/images/${files[i].name}`);
+			const uploadTask = await uploadBytes(storageRef, files);
 
-// 'file' comes from the Blob or File API
-uploadBytes(storageRef, file).then((snapshot) => {
-  console.log('Uploaded a blob or file!');
-});
-	}
+			data.push(await getDownloadURL(uploadTask.ref));
+		}
+
+		return data;
+	};
 
 	if (loading) {
 		return <Spinner />;
 	}
+
+	console.log('images', imgUrls);
 
 	return (
 		<div className='profile'>
@@ -132,9 +150,9 @@ uploadBytes(storageRef, file).then((snapshot) => {
 						</button>
 						<button
 							type='button'
-							className={type === 'Rent' ? 'formButtonActive' : 'formButton'}
+							className={type === 'rent' ? 'formButtonActive' : 'formButton'}
 							id='type'
-							value='Rent'
+							value='rent'
 							onClick={onMutate}
 						>
 							Rent
@@ -235,6 +253,7 @@ uploadBytes(storageRef, file).then((snapshot) => {
 					</div>
 
 					<label className='formLabel'>Address</label>
+
 					<textarea
 						className='formInputAddress'
 						type='text'
@@ -244,7 +263,7 @@ uploadBytes(storageRef, file).then((snapshot) => {
 						required
 					/>
 
-					{!geolocationEnabled && (
+					{geolocationEnabled && (
 						<div className='formLatLng flex'>
 							<div>
 								<label className='formLabel'>Latitude</label>
@@ -257,12 +276,13 @@ uploadBytes(storageRef, file).then((snapshot) => {
 									required
 								/>
 							</div>
+
 							<div>
 								<label className='formLabel'>Longitude</label>
 								<input
 									className='formInputSmall'
 									type='number'
-									id='langitude'
+									id='longitude'
 									value={longitude}
 									onChange={onMutate}
 									required
@@ -327,9 +347,9 @@ uploadBytes(storageRef, file).then((snapshot) => {
 					)}
 
 					<label className='formLabel'>Images</label>
-					
+
 					<p>The first image will be the cover (max 6).</p>
-					
+
 					<input
 						className='formInputFile'
 						type='file'
@@ -337,6 +357,7 @@ uploadBytes(storageRef, file).then((snapshot) => {
 						onChange={onMutate}
 						accept='.jpg,.png,.jpeg'
 						required
+						multiple
 					/>
 
 					<button type='submit' className='primaryButton createListingButton'>

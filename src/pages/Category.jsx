@@ -21,6 +21,8 @@ function Category() {
 	const params = useParams();
 
 	useEffect(() => {
+		console.log('pp', params);
+
 		const fetchListings = async () => {
 			try {
 				// Get reference
@@ -30,7 +32,6 @@ function Category() {
 				const q = query(
 					listingsRef,
 					where('type', '==', params.categoryName),
-					orderBy('timestamp', 'desc'),
 					limit(10)
 				);
 
@@ -40,6 +41,7 @@ function Category() {
 				let listings = [];
 
 				querySnap.forEach(doc => {
+					console.log('dd', doc);
 					listings.push({
 						id: doc.id,
 						data: doc.data(),
