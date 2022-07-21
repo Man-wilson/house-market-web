@@ -28,6 +28,7 @@ function Contact() {
 	}, [params.landlordId]);
 
 	const onChange = e => setMessage(e.target.value);
+	
 	return (
 		<div className='pageContainer'>
 			<header>
@@ -54,9 +55,10 @@ function Contact() {
 							></textarea>
 						</div>
 
-						<a
-							href={`mailto:${landlord.email}?Subject=$
-            {searchParams.get('listingName')}&bod=${message}`}
+						<a href={`mailto:${landlord.email}?Subject=$ 
+                            {searchParams.get(
+								'listingName'
+								)}&body=${message}`}
 						>
 							<button type='button' className='primaryButton'>
 								Send Message
