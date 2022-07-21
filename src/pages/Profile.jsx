@@ -14,6 +14,8 @@ function Profile() {
 		email: auth.currentUser.email,
 	});
 
+	console.log('auth', auth.currentUser);
+
 	const { name, email } = formData;
 
 	const navigate = useNavigate();

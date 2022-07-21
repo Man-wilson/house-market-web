@@ -12,9 +12,11 @@ function Contact() {
 
 	const params = useParams();
 
+	console.log('params', params);
+
 	useEffect(() => {
 		const getLandlord = async () => {
-			const docRef = doc(db, 'users', params.landlordId);
+			const docRef = doc(db, 'users', 'GERg2T6dNFVXQJ948wTLcpRDbNE3');
 			const docSnap = await getDoc(docRef);
 
 			if (docSnap.exists()) {
@@ -28,7 +30,7 @@ function Contact() {
 	}, [params.landlordId]);
 
 	const onChange = e => setMessage(e.target.value);
-	
+
 	return (
 		<div className='pageContainer'>
 			<header>
@@ -55,7 +57,8 @@ function Contact() {
 							></textarea>
 						</div>
 
-						<a href={`mailto:${landlord.email}?Subject=$ 
+						<a
+							href={`mailto:${landlord.email}?Subject=$ 
                             {searchParams.get(
 								'listingName'
 								)}&body=${message}`}

@@ -11,26 +11,28 @@ import { v4 as uuidv4 } from 'uuid';
 import Spinner from '../components/Spinner';
 import { async } from '@firebase/util';
 
+const INITIAL_PAYLOAD = {
+	type: 'rent',
+	name: '',
+	bedrooms: 1,
+	bathrooms: 1,
+	parking: false,
+	furnished: false,
+	address: '',
+	offer: '',
+	regularPrice: 0,
+	discountedPrice: 0,
+	imgUrls: [],
+	latitude: 0,
+	longitude: 0,
+};
+
 function CreateListings() {
 	const geolocationEnabled = true;
 
 	const [loading, setLoading] = useState(true);
 
-	const [formData, setFormData] = useState({
-		type: 'rent',
-		name: '',
-		bedrooms: 1,
-		bathrooms: 1,
-		parking: false,
-		furnished: false,
-		address: '',
-		offer: '',
-		regularPrice: 0,
-		discountedPrice: 0,
-		imgUrls: [],
-		latitude: 0,
-		longitude: 0,
-	});
+	const [formData, setFormData] = useState(INITIAL_PAYLOAD);
 
 	const {
 		type,
@@ -68,12 +70,19 @@ function CreateListings() {
 
 		setLoading(true);
 
+		const imgToUpload = await handleImageUpload(imgUrls);
+
 		try {
-			const docRef = await addDoc(collection(db, 'listings'), formData);
-			console.log('docRef', docRef);
-			console.log('dd', docRef);
+			await addDoc(collection(db, 'listings'), {
+				...formData,
+				imgUrls: imgToUpload,
+			});
+
+			toast.success('List added');
+			setFormData(INITIAL_PAYLOAD);
 		} catch (e) {
 			console.log('yoooo it happened', e);
+			toast.error('Something went wrong');
 		}
 
 		setLoading(false);
@@ -93,10 +102,11 @@ function CreateListings() {
 		// handle image upload
 		if (e.target.files) {
 			try {
-				const uploadedImages = await handleImageUpload(e.target.files);
-
 				return setFormData(prevState => {
-					return { ...prevState, imgUrls: uploadedImages };
+					return {
+						...prevState,
+						imgUrls: [...prevState.imgUrls, ...e.target.files],
+					};
 				});
 			} catch (error) {
 				console.error('error founed here', error);
@@ -114,8 +124,8 @@ function CreateListings() {
 		let data = [];
 
 		for (let i = 0; i < files.length; i++) {
-			const storageRef = ref(storage, `/images/${files[i].name}`);
-			const uploadTask = await uploadBytes(storageRef, files);
+			const storageRef = ref(storage, `/test/${files[i].name}`);
+			const uploadTask = await uploadBytes(storageRef, files[i]);
 
 			data.push(await getDownloadURL(uploadTask.ref));
 		}
