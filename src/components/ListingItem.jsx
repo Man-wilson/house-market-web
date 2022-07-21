@@ -24,7 +24,7 @@ const ListingItem = ({ listing, id, onDelete }) => {
 					<p className='categoryListingPrice'>
 						{formatCurrency(
 							listing.offer
-								? Number(listing.discountPrice)
+								? Number(listing.discountedPrice)
 								: Number(listing.regularPrice)
 						)}
 
