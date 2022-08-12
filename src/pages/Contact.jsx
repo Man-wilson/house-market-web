@@ -12,11 +12,9 @@ function Contact() {
 
 	const params = useParams();
 
-	console.log('params', params);
-
 	useEffect(() => {
 		const getLandlord = async () => {
-			const docRef = doc(db, 'users', 'GERg2T6dNFVXQJ948wTLcpRDbNE3');
+			const docRef = doc(db, 'users', params.landlordId);
 			const docSnap = await getDoc(docRef);
 
 			if (docSnap.exists()) {
@@ -37,13 +35,13 @@ function Contact() {
 				<p className='pageHeader'>Contact landlord</p>
 			</header>
 
-			{landlord !== null && (
+			{landlord && (
 				<main>
 					<div className='contactLandlord'>
-						<p className='landlordName'>Contact {landlord?.name}</p>
+						<p className='landlordName'>Contact: {landlord?.displayName}</p>
 					</div>
 
-					<form className='messageForm'>
+					<div className='messageForm'>
 						<div className='messageDiv'>
 							<label htmlFor='message' className='messageLabel'>
 								Message
@@ -59,15 +57,12 @@ function Contact() {
 
 						<a
 							href={`mailto:${landlord.email}?Subject=$ 
-                            {searchParams.get(
-								'listingName'
-								)}&body=${message}`}
+                            ${searchParams.get('listingName')}&body=${message}`}
+							className='primaryButton'
 						>
-							<button type='button' className='primaryButton'>
-								Send Message
-							</button>
+							Send Message
 						</a>
-					</form>
+					</div>
 				</main>
 			)}
 		</div>
