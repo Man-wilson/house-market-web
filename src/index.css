@@ -184,6 +184,13 @@ button {
 .navbarListItemNameActive {
   color: #2c2c2c;
 }
+.ListItems {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
 
 .nameInput {
   margin-bottom: 2rem;

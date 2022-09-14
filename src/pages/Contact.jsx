@@ -57,7 +57,7 @@ function Contact() {
 
 						<a
 							href={`mailto:${landlord.email}?Subject=$ 
-                            ${searchParams.get('listingName')}&body=${message}`}
+                            ${searchParams.get('House Market Center')}&body=${message}`}
 							className='primaryButton'
 						>
 							Send Message
